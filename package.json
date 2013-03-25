@@ -1,0 +1,41 @@
+{
+  "name": "symfio-contrib-fixtures"
+, "version": "0.1.0"
+, "description": "Load fixtures to database from fixtures directory."
+, "keywords": ["symfio-plugin", "symfio-contrib", "fixtures"]
+, "homepage": "http://symf.io/plugins/contrib-fixtures"
+, "bugs": {
+    "url": "https://github.com/symfio/symfio-contrib-fixtures/issues"
+  , "email": "webmaster@rithis.com"
+  }
+, "author": {
+    "name": "Vyacheslav Slinko"
+  , "email": "vyacheslav.slinko@gmail.com"
+  }
+, "main": "lib/fixtures"
+, "repository": {
+    "type": "git"
+  , "url": "git://github.com/symfio/symfio-contrib-fixtures.git"
+  }
+, "scripts": {
+    "test": "grunt simplemocha"
+  }
+, "dependencies": {
+    "async": "~0.2"
+  }
+, "devDependencies": {
+    "symfio": "~1.0"
+  , "symfio-suite": "~1.0"
+  , "symfio-contrib-express": "~0.1"
+  , "symfio-contrib-mongoose": "~0.1"
+  , "cruder": "~0.1"
+  , "grunt": "~0.4"
+  , "grunt-simple-mocha": "~0.3"
+  , "grunt-coffeelint": "~0.0"
+  }
+, "engines": {
+    "node": "~0.8"
+  , "npm": "~1.2"
+  , "coffee-script": "~1.6"
+  }
+}
