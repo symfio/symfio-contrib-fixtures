@@ -18,24 +18,29 @@
   , "url": "git://github.com/symfio/symfio-contrib-fixtures.git"
   }
 , "scripts": {
-    "test": "grunt simplemocha"
+    "test": "npm install && grunt"
   }
 , "dependencies": {
-    "async": "~0.2"
+    "when": "~2.1"
   }
 , "devDependencies": {
-    "symfio": "~1.0"
-  , "symfio-suite": "~1.0"
-  , "symfio-contrib-express": "~0.1"
-  , "symfio-contrib-mongoose": "~0.1"
+    "symfio": "~2.0"
+  , "symfio-contrib-express": "~2.0"
+  , "symfio-contrib-mongoose": "~2.0"
   , "cruder": "~0.1"
+  , "chai": "~1.6"
+  , "chai-as-promised": "~3.3"
+  , "chai-http": "~0.3"
+  , "sinon": "~1.7"
+  , "sinon-chai": "~2.4"
   , "grunt": "~0.4"
   , "grunt-simple-mocha": "~0.4"
   , "grunt-coffeelint": "~0.0"
   }
 , "engines": {
-    "node": "~0.8"
-  , "npm": "~1.2"
+    "node": ">=0.8"
+  , "npm": ">=1.2"
   , "coffee-script": "~1.6"
+  , "grunt-cli": "~0.4"
   }
 }

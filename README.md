@@ -12,12 +12,10 @@ symfio = require "symfio"
 
 container = symfio "example", __dirname
 
-loader = container.get "loader"
+container.use require "symfio-contrib-mongoose"
+container.use require "symfio-contrib-fixtures"
 
-loader.use require "symfio-contrib-mongoose"
-loader.use require "symfio-contrib-fixtures"
-
-loader.load()
+container.load()
 ```
 
 ## Required plugins
@@ -26,4 +24,4 @@ loader.load()
 
 ## Can be configured
 
-* __fixtures directory__ - Default value is `fixtures`.
+* __fixturesDirectory__ - Default value is `fixtures`.

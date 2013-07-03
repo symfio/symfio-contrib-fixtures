@@ -1,62 +1,97 @@
-async = require "async"
+nodefn = require "when/node/function"
+apply = require "when/apply"
 path = require "path"
 fs = require "fs"
+w = require "when"
 
 
-module.exports = (container, callback) ->
-  applicationDirectory = container.get "application directory"
-  fixturesDirectory = path.join applicationDirectory, "fixtures"
+module.exports = (container, applicationDirectory, fixturesDirectory) ->
+  readFixturesDirectory = (fixturesDirectory) ->
+    nodefn.call(fs.readdir, fixturesDirectory).then (files) ->
+      files.map (file) ->
+        path.join fixturesDirectory, file
 
-  fixturesDirectory = container.get "fixtures directory", fixturesDirectory
-  connection = container.get "connection"
-  logger = container.get "logger"
 
-  logger.info "loading plugin", "contrib-fixtures"
+  readFixtures = (files) ->
+    fixtures = []
 
-  fs.readdir fixturesDirectory, (err, files) ->
-    return callback() unless files
-
-    tasks = []
     for file in files
-      if path.extname(file) is ".json"
-        tasks.push
-          collection: path.basename file, ".json"
-          file: path.join fixturesDirectory, file
+      if path.extname(file) in [".json", ".js", ".coffee"]
+        fixture = readFixture file
+        fixtures.push w.join file, fixture if fixture
 
-    worker = (task, callback) ->
-      async.waterfall [
-        (callback) ->
-          fs.readFile task.file, callback
+    w.all fixtures
 
-        (data, callback) ->
-          try
-            callback null, JSON.parse data
-          catch err
-            callback null, false
 
-        (fixture, callback) ->
-          return callback() unless fixture
+  readFixture = (file) ->
+    switch path.extname file
+      when ".json"
+        readJSONFixture file
+      when ".js", ".coffee"
+        readJSFixture file
+      else
+        w.reject new Error "Unknown fixture format `#{file}'"
 
-          try
-            model = connection.model task.collection
-          catch err
-            logger.warn err
-            return callback null
 
-          model.count (err, count) ->
-            return callback err if err
-            return callback null if count > 0
+  readJSONFixture = (file) ->
+    nodefn.call(fs.readFile, file).then (data) ->
+      JSON.parse data
 
-            logger.info "loading fixture", task.collection
 
-            itemWorker = (data, callback) ->
-              item = new model data
-              item.save callback
+  readJSFixture = (file) ->
+    require file
 
-            async.forEachSeries fixture, itemWorker, ->
-              callback()
 
-      ], callback
+  saveFixtures = (fixtures) ->
+    w.map fixtures, apply saveFixture
 
-    async.forEach tasks, worker, ->
-      callback()
+
+  saveFixture = (file, fixture) ->
+    parseCollection(file)
+    .then(getModel)
+    .then (Model) ->
+      countModel(Model).then (count) ->
+        if count == 0
+          w.map fixture, (data) ->
+            item = new Model data
+            nodefn.call item.save.bind item
+
+
+  parseCollection = (file) ->
+    w.resolve path.basename file, path.extname file
+
+
+  getModel = (collection) ->
+    container.get("connection")
+    .then (connection) ->
+      connection.model collection
+    .then null, (err) ->
+      throw new Error "No model found for collection named `#{collection}'"
+
+
+  countModel = (Model) ->
+    nodefn.call Model.count.bind Model
+
+
+  loadFixture = (file) ->
+    readFixture(file).then (fixture) ->
+      saveFixture file, fixture
+
+
+  loadFixtures = (fixturesDirectory) ->
+    readFixturesDirectory(fixturesDirectory)
+    .then(readFixtures)
+    .then(saveFixtures)
+
+
+  unless fixturesDirectory
+    fixturesDirectory = path.join applicationDirectory, "fixtures"
+    container.set "fixturesDirectory", fixturesDirectory
+
+  container.set "fixture", ->
+    loadFixture
+
+  container.set "fixtures", ->
+    readFixturesDirectory
+
+  container.get("fixturesDirectory").then loadFixtures

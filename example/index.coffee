@@ -2,38 +2,19 @@ symfio = require "symfio"
 cruder = require "cruder"
 
 module.exports = container = symfio "example", __dirname
-loader = container.get "loader"
 
-loader.use require "symfio-contrib-express"
-loader.use require "symfio-contrib-mongoose"
+container.use require "symfio-contrib-express"
+container.use require "symfio-contrib-mongoose"
 
-loader.use (container, callback) ->
-  connection = container.get "connection"
-  mongoose = container.get "mongoose"
+container.use (model, get) ->
+  model "Laws", "laws", (mongoose) ->
+    new mongoose.Schema
+      number: Number
+      law: String
 
-  LawsSchema = new mongoose.Schema
-    number: Number
-    law: String
+  get "/laws", (Laws) ->
+    cruder.list Laws.find().sort(number: 1)
 
-  connection.model "laws", LawsSchema
+container.use require ".."
 
-  callback()
-
-loader.use require "../lib/fixtures"
-
-loader.use (container, callback) ->
-  connection = container.get "connection"
-  unloader = container.get "unloader"
-  app = container.get "app"
-
-  Laws = connection.model "laws"
-
-  app.get "/laws", cruder.list Laws.find().sort(number: 1)
-
-  unloader.register (callback) ->
-    connection.db.dropDatabase ->
-      callback()
-
-  callback()
-
-loader.load() if require.main is module
+container.load() if require.main is module
