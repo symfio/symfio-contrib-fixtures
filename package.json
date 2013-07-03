@@ -1,6 +1,6 @@
 {
   "name": "symfio-contrib-fixtures"
-, "version": "0.1.1"
+, "version": "2.0.0-beta"
 , "description": "Load fixtures to database from fixtures directory."
 , "keywords": ["symfio-plugin", "symfio-contrib", "fixtures"]
 , "homepage": "http://symf.io/plugins/contrib-fixtures"
