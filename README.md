@@ -34,4 +34,4 @@ Fixture loading helper. First argument is path to fixture file.
 
 ### `fixtures`
 
-Fixtures loading helper. First argument is path to directiry with fixture files.
+Fixtures loading helper. First argument is path to directory with fixture files.
