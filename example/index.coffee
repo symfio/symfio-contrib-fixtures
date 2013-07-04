@@ -1,21 +1,34 @@
 symfio = require "symfio"
 cruder = require "cruder"
+w = require "when"
+
 
 module.exports = container = symfio "example", __dirname
 
-container.use require "symfio-contrib-winston"
-container.use require "symfio-contrib-express"
-container.use require "symfio-contrib-mongoose"
+module.exports.promise = container.injectAll [
+  require "symfio-contrib-winston"
+  require "symfio-contrib-express"
+  require "symfio-contrib-mongoose"
 
-container.use (model, get) ->
-  model "Laws", "laws", (mongoose) ->
-    new mongoose.Schema
-      number: Number
-      law: String
+  (model, get) ->
+    model "Laws", "laws", (mongoose) ->
+      new mongoose.Schema
+        number: Number
+        law: String
 
-  get "/laws", (Laws) ->
-    cruder.list Laws.find().sort(number: 1)
+    get "/laws", (Laws) ->
+      cruder.list Laws.find().sort(number: 1)
 
-container.use require ".."
+  (connection) ->
+    deffered = w.defer()
 
-container.load() if require.main is module
+    connection.db.dropDatabase ->
+      deffered.resolve container.inject require ".."
+
+    deffered.promise
+]
+
+
+if require.main is module
+  container.get("listener").then (listener) ->
+    listener.listen()

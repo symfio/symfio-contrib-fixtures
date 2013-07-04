@@ -21,7 +21,7 @@
     "test": "npm install && grunt"
   }
 , "dependencies": {
-    "when": "~2.1"
+    "when": "~2.2"
   }
 , "devDependencies": {
     "symfio": "~2.0"
@@ -29,9 +29,9 @@
   , "symfio-contrib-mongoose": "~2.0"
   , "symfio-contrib-winston": "~2.0"
   , "cruder": "~0.1"
-  , "chai": "~1.6"
+  , "chai": "~1.7"
   , "chai-as-promised": "~3.3"
-  , "chai-http": "~0.3"
+  , "chai-http": "~0.4"
   , "sinon": "~1.7"
   , "sinon-chai": "~2.4"
   , "grunt": "~0.4"

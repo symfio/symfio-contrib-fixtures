@@ -10,21 +10,22 @@ describe "contrib-fixtures plugin", ->
   chai.use require "sinon-chai"
   chai.should()
 
-  connection = null
   container = null
   sandbox = null
-  model = null
+  User = null
 
   beforeEach ->
     container = symfio "test", __dirname
     sandbox = sinon.sandbox.create()
 
-    model = ->
-    model.count = sandbox.stub()
-    model.prototype = save: sandbox.stub()
+    User = ->
+    User.count = sandbox.stub()
+    User.prototype = save: sandbox.stub()
+    container.set "User", ->
+      User
 
     sandbox.stub fs, "readdir"
-    fs.readdir.yields null, ["users.json"]
+    fs.readdir.yields null, ["User.json"]
 
     sandbox.stub fs, "readFile"
     fs.readFile.yields null, JSON.stringify [
@@ -33,28 +34,20 @@ describe "contrib-fixtures plugin", ->
       {username: "username", password: "password"}
     ]
 
-    connection = model: sandbox.stub()
-    connection.model.returns model
-    container.set "connection", connection
-
   afterEach ->
     sandbox.restore()
 
   it "should load fixtures only if collection is empty", (callback) ->
-    model.count.yields null, 0
-    model.prototype.save.yields()
+    User.count.yields null, 0
+    User.prototype.save.yields()
 
-    container.call(plugin).then ->
-      model.prototype.save.should.been.calledThrice
+    container.inject(plugin).then ->
+      User.prototype.save.should.been.calledThrice
     .then ->
-      model.prototype.save.reset()
-      model.count.yields null, 3
+      User.prototype.save.reset()
+      User.count.yields null, 3
     .then ->
-      container.call plugin
+      container.inject plugin
     .then ->
-      model.prototype.save.should.not.been.called
+      User.prototype.save.should.not.been.called
     .should.notify callback
-
-  it "should reject if mongoose module isn't defined", (callback) ->
-    connection.model.throws()
-    container.call(plugin).should.be.rejected.and.notify callback

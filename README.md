@@ -12,16 +12,26 @@ symfio = require "symfio"
 
 container = symfio "example", __dirname
 
-container.use require "symfio-contrib-mongoose"
-container.use require "symfio-contrib-fixtures"
-
-container.load()
+container.inject require "symfio-contrib-mongoose"
+container.inject require "symfio-contrib-fixtures"
 ```
 
-## Required plugins
+## Dependencies
 
 * [contrib-mongoose](https://github.com/symfio/symfio-contrib-mongoose)
 
-## Can be configured
+## Configuration
 
-* __fixturesDirectory__ - Default value is `fixtures`.
+### `fixturesDirectory`
+
+Default value is `fixtures`.
+
+## Services
+
+### `fixture`
+
+Fixture loading helper. First argument is path to fixture file.
+
+### `fixtures`
+
+Fixtures loading helper. First argument is path to directiry with fixture files.

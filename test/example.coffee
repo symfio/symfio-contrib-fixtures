@@ -8,11 +8,10 @@ describe "contrib-fixtures example", ->
   chai.should()
 
   container = require "../example"
+  container.set "env", "test"
 
   before (callback) ->
-    container.set "autoload", false
-    container.set "env", "test"
-    container.load().should.notify callback
+    container.promise.should.notify callback
 
   describe "GET /laws", ->
     it "should respond with laws", (callback) ->

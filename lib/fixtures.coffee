@@ -47,29 +47,27 @@ module.exports = (container, logger) ->
 
 
   saveFixture = (file, fixture) ->
-    parseCollection(file)
-    .then(getModel)
-    .then (Model) ->
-      countModel(Model).then (count) ->
-        if count == 0
-          logger.info "save fixture", file: file, model: Model.modelName
+    parseKey(file).then (key) ->
+      [key, getModel(key)]
 
-          w.map fixture, (data) ->
-            item = new Model data
-            nodefn.call item.save.bind item
+    .spread (key, Model) ->
+      [key, Model, countModel(Model)]
+
+    .spread (key, Model, count) ->
+      if count == 0
+        logger.info "save fixture", file: file, model: key
+
+        w.map fixture, (data) ->
+          item = new Model data
+          nodefn.call item.save.bind item
 
 
-  parseCollection = (file) ->
+  parseKey = (file) ->
     w.resolve path.basename file, path.extname file
 
 
-  getModel = (collection) ->
-    container.get("connection")
-    .then (connection) ->
-      connection.model collection
-    .then null, (err) ->
-      logger.warn "no model found", collection: collection
-      throw new Error "No model found for collection named `#{collection}'"
+  getModel = (key) ->
+    container.get key
 
 
   countModel = (Model) ->
@@ -96,4 +94,5 @@ module.exports = (container, logger) ->
   container.set "fixtures", ->
     readFixturesDirectory
 
-  container.get("fixturesDirectory").then loadFixtures
+  container.inject (fixturesDirectory) ->
+    loadFixtures fixturesDirectory
