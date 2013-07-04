@@ -5,7 +5,7 @@ fs = require "fs"
 w = require "when"
 
 
-module.exports = (container, applicationDirectory, fixturesDirectory) ->
+module.exports = (container, logger) ->
   readFixturesDirectory = (fixturesDirectory) ->
     nodefn.call(fs.readdir, fixturesDirectory).then (files) ->
       files.map (file) ->
@@ -52,6 +52,8 @@ module.exports = (container, applicationDirectory, fixturesDirectory) ->
     .then (Model) ->
       countModel(Model).then (count) ->
         if count == 0
+          logger.info "save fixture", file: file, model: Model.modelName
+
           w.map fixture, (data) ->
             item = new Model data
             nodefn.call item.save.bind item
@@ -66,6 +68,7 @@ module.exports = (container, applicationDirectory, fixturesDirectory) ->
     .then (connection) ->
       connection.model collection
     .then null, (err) ->
+      logger.warn "no model found", collection: collection
       throw new Error "No model found for collection named `#{collection}'"
 
 
@@ -84,9 +87,8 @@ module.exports = (container, applicationDirectory, fixturesDirectory) ->
     .then(saveFixtures)
 
 
-  unless fixturesDirectory
-    fixturesDirectory = path.join applicationDirectory, "fixtures"
-    container.set "fixturesDirectory", fixturesDirectory
+  container.unless "fixturesDirectory", (applicationDirectory) ->
+    path.join applicationDirectory, "fixtures"
 
   container.set "fixture", ->
     loadFixture
