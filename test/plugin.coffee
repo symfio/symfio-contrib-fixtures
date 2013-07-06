@@ -5,7 +5,7 @@ chai = require "chai"
 fs = require "fs"
 
 
-describe "contrib-fixtures plugin", ->
+describe "contrib-fixtures()", ->
   chai.use require "chai-as-promised"
   chai.use require "sinon-chai"
   chai.should()
