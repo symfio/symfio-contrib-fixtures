@@ -1,5 +1,4 @@
 symfio = require "symfio"
-cruder = require "cruder"
 w = require "when"
 
 
@@ -9,15 +8,16 @@ module.exports.promise = container.injectAll [
   require "symfio-contrib-winston"
   require "symfio-contrib-express"
   require "symfio-contrib-mongoose"
+  require "symfio-contrib-cruder"
 
-  (model, get) ->
+  (model) ->
     model "Laws", "laws", (mongoose) ->
       new mongoose.Schema
         number: Number
         law: String
 
-    get "/laws", (Laws) ->
-      cruder.list Laws.find().sort(number: 1)
+    container.inject (resource, Laws) ->
+      resource Laws, list: query: -> Laws.find().sort(number: 1)
 
   (connection) ->
     deffered = w.defer()

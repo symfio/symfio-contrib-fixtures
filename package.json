@@ -28,7 +28,7 @@
   , "symfio-contrib-express": "~2.0"
   , "symfio-contrib-mongoose": "~2.0"
   , "symfio-contrib-winston": "~2.0"
-  , "cruder": "~0.1"
+  , "symfio-contrib-cruder": "~2.0"
   , "chai": "~1.7"
   , "chai-as-promised": "~3.3"
   , "chai-http": "~0.4"
