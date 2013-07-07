@@ -94,5 +94,5 @@ module.exports = (container, logger) ->
   container.set "fixtures", ->
     loadFixtures
 
-  container.inject (fixturesDirectory) ->
-    loadFixtures fixturesDirectory
+  container.inject (fixtures, fixturesDirectory) ->
+    fixtures fixturesDirectory
