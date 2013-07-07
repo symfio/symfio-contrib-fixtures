@@ -92,7 +92,7 @@ module.exports = (container, logger) ->
     loadFixture
 
   container.set "fixtures", ->
-    readFixturesDirectory
+    loadFixtures
 
   container.inject (fixturesDirectory) ->
     loadFixtures fixturesDirectory
