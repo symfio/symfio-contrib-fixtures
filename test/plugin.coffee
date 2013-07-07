@@ -1,62 +1,61 @@
-plugin = require ".."
 suite = require "symfio-suite"
 fs = require "fs"
 
 
 describe "contrib-fixtures()", ->
-  it = suite.plugin [
-    (container) ->
-      container.set "applicationDirectory", __dirname
+  it = suite.plugin (container, containerStub, logger) ->
+    require("..") containerStub, logger
 
-      container.set "User", (sandbox) ->
-        User = ->
-        User.count = sandbox.stub()
-        User.prototype = save: sandbox.stub()
-        User.count.yields null, 0
-        User.prototype.save.yields()
-        User
+    container.set "User", (sandbox, containerStub) ->
+      User = ->
+      User.count = sandbox.stub()
+      User.prototype = save: sandbox.stub()
+      User.prototype.save.yields()
+      containerStub.get.promise.then.yields User
+      User
 
-      container.inject (sandbox) ->
-        sandbox.stub fs, "readdir"
-        fs.readdir.yields null, ["User.json"]
+    container.set "fixtures", (sandbox) ->
+      sandbox.spy()
 
-        sandbox.stub fs, "readFile"
-        fs.readFile.yields null, JSON.stringify [
-          {username: "username", password: "password"}
-          {username: "username", password: "password"}
-          {username: "username", password: "password"}
-        ]
+    container.inject (sandbox) ->
+      sandbox.stub fs, "readdir"
+      fs.readdir.yields null, ["User.json"]
 
-    plugin
-  ]
+      sandbox.stub fs, "readFile"
+      fs.readFile.yields null, JSON.stringify [
+        {username: "username", password: "password"}
+        {username: "username", password: "password"}
+        {username: "username", password: "password"}
+      ]
 
   describe "container.unless fixturesDirectory", ->
-    it "should define", (fixturesDirectory) ->
-      fixturesDirectory.should.equal "#{__dirname}/fixtures"
+    it "should define", (containerStub) ->
+      factory = containerStub.unless.get "fixturesDirectory"
+      factory("/").should.equal "/fixtures"
 
   describe "container.set fixture", ->
-    it "should save fixture", (fixture, User) ->
-      fs.readFile.reset()
-      User.prototype.save.reset()
-
+    it "should save fixture", (containerStub, User) ->
+      User.count.yields null, 0
+      factory = containerStub.set.get "fixture"
+      fixture = factory()
       fixture("User.json").then ->
         fs.readFile.should.be.calledOnce
         fs.readFile.should.be.calledWith "User.json"
         User.prototype.save.should.be.calledThrice
 
-    it "should load fixture only if collection is empty", (fixture, User) ->
-      User.prototype.save.reset()
-      User.count.yields null, 3
-
-      fixture("User.json").then ->
-        User.prototype.save.should.not.be.called
+    it "should load fixture only if collection is empty",
+      (containerStub, User) ->
+        User.count.yields null, 3
+        factory = containerStub.set.get "fixture"
+        fixture = factory()
+        fixture("User.json").then ->
+          User.prototype.save.should.not.be.called
 
   describe "container.set fixtures", ->
-    it "should save fixtures", (fixtures, User) ->
-      fs.readdir.reset()
-      fs.readFile.reset()
-      User.prototype.save.reset()
-
+    it "should save fixtures", (containerStub, User) ->
+      User.count.yields null, 0
+      factory = containerStub.set.get "fixtures"
+      fixtures = factory()
       fixtures("/").then ->
         fs.readdir.should.be.calledOnce
         fs.readdir.should.be.calledWith "/"
@@ -64,16 +63,8 @@ describe "contrib-fixtures()", ->
         fs.readFile.should.be.calledWith "/User.json"
         User.prototype.save.should.be.calledThrice
 
-  it "should load fixtures from fixturesDirectory", (container) ->
-    container.set "fixtures", (sandbox) ->
-      sandbox.spy()
-
-    container.inject (sandbox) ->
-      sandbox.stub container, "set"
-    .then ->
-      container.inject plugin
-    .then ->
-      container.get ["fixtures", "fixturesDirectory"]
-    .spread (fixtures, fixturesDirectory) ->
-      fixtures.should.be.calledOnce
-      fixtures.should.be.calledWith fixturesDirectory
+  it "should load fixtures from fixturesDirectory", (containerStub, fixtures) ->
+    factory = containerStub.inject.get 0
+    factory fixtures, "/"
+    fixtures.should.be.calledOnce
+    fixtures.should.be.calledWith "/"
