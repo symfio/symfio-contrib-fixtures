@@ -3,16 +3,21 @@ fs = require "fs"
 
 
 describe "contrib-fixtures()", ->
-  it = suite.plugin (container, containerStub, logger) ->
-    require("..") containerStub, logger
+  it = suite.plugin (container) ->
+    container.inject ["suite/container", "logger"], require ".."
 
-    container.set "User", (sandbox, containerStub) ->
-      User = ->
-      User.count = sandbox.stub()
-      User.prototype = save: sandbox.stub()
-      User.prototype.save.yields()
-      containerStub.get.promise.then.yields User
-      User
+    container.set "applicationDirectory", "/"
+    container.set "fixturesDirectory", "/fixtures"
+
+    container.set "User",
+      ["sandbox", "suite/container"],
+      (sandbox, container) ->
+        User = ->
+        User.count = sandbox.stub()
+        User.prototype = save: sandbox.stub()
+        User.prototype.save.yields()
+        container.get.promise.then.yields User
+        User
 
     container.set "fixtures", (sandbox) ->
       sandbox.spy()
@@ -29,42 +34,44 @@ describe "contrib-fixtures()", ->
       ]
 
   describe "container.unless fixturesDirectory", ->
-    it "should define", (containerStub) ->
-      factory = containerStub.unless.get "fixturesDirectory"
-      factory("/").should.equal "/fixtures"
+    it "should define", (unlessed) ->
+      factory = unlessed "fixturesDirectory"
+      factory().should.eventually.equal "/fixtures"
 
   describe "container.set fixture", ->
-    it "should save fixture", (containerStub, User) ->
+    it "should save fixture", (setted, User) ->
       User.count.yields null, 0
-      factory = containerStub.set.get "fixture"
-      fixture = factory()
-      fixture("User.json").then ->
+      factory = setted "fixture"
+      factory().then (fixture) ->
+        fixture "User.json"
+      .then ->
         fs.readFile.should.be.calledOnce
         fs.readFile.should.be.calledWith "User.json"
         User.prototype.save.should.be.calledThrice
 
-    it "should load fixture only if collection is empty",
-      (containerStub, User) ->
-        User.count.yields null, 3
-        factory = containerStub.set.get "fixture"
-        fixture = factory()
-        fixture("User.json").then ->
-          User.prototype.save.should.not.be.called
+    it "should load fixture only if collection is empty", (setted, User) ->
+      User.count.yields null, 3
+      factory = setted "fixture"
+      factory().then (fixture) ->
+        fixture "User.json"
+      .then ->
+        User.prototype.save.should.not.be.called
 
   describe "container.set fixtures", ->
-    it "should save fixtures", (containerStub, User) ->
+    it "should save fixtures", (setted, User) ->
       User.count.yields null, 0
-      factory = containerStub.set.get "fixtures"
-      fixtures = factory()
-      fixtures("/").then ->
+      factory = setted "fixtures"
+      factory().then (fixtures) ->
+        fixtures "/"
+      .then ->
         fs.readdir.should.be.calledOnce
         fs.readdir.should.be.calledWith "/"
         fs.readFile.should.be.calledOnce
         fs.readFile.should.be.calledWith "/User.json"
         User.prototype.save.should.be.calledThrice
 
-  it "should load fixtures from fixturesDirectory", (containerStub, fixtures) ->
-    factory = containerStub.inject.get 0
-    factory fixtures, "/"
-    fixtures.should.be.calledOnce
-    fixtures.should.be.calledWith "/"
+  it "should load fixtures from fixturesDirectory", (injected) ->
+    factory = injected()
+    factory().then ->
+      factory.dependencies.fixtures.should.be.calledOnce
+      factory.dependencies.fixtures.should.be.calledWith "/fixtures"

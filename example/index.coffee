@@ -31,7 +31,6 @@ module.exports.promise = container.injectAll [
 
 if require.main is module
   module.exports.promise.then ->
-    container.get "listener"
-  .then (listener) ->
-    listener.listen()
-
+    container.get "startExpressServer"
+  .then (startExpressServer) ->
+    startExpressServer()
