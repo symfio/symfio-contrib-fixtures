@@ -4,7 +4,7 @@ w = require "when"
 
 module.exports = container = symfio "example", __dirname
 
-module.exports.promise = container.injectAll [
+module.exports.promise = container.injectAll([
   require "symfio-contrib-winston"
   require "symfio-contrib-express"
   require "symfio-contrib-mongoose"
@@ -26,7 +26,10 @@ module.exports.promise = container.injectAll [
       deffered.resolve container.inject require ".."
 
     deffered.promise
-]
+]).then ->
+  container.get "loadFixtures"
+.then (loadFixtures) ->
+  loadFixtures()
 
 
 if require.main is module

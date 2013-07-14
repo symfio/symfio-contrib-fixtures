@@ -70,8 +70,11 @@ describe "contrib-fixtures()", ->
         fs.readFile.should.be.calledWith "/User.json"
         User.prototype.save.should.be.calledThrice
 
-  it "should load fixtures from fixturesDirectory", (injected) ->
-    factory = injected()
-    factory().then ->
-      factory.dependencies.fixtures.should.be.calledOnce
-      factory.dependencies.fixtures.should.be.calledWith "/fixtures"
+  describe "container.set loadFixtures", ->
+    it "should load fixtures from fixturesDirectory", (setted) ->
+      factory = setted "loadFixtures"
+      factory().then (loadFixtures) ->
+        loadFixtures()
+      .then ->
+        factory.dependencies.fixtures.should.be.calledOnce
+        factory.dependencies.fixtures.should.be.calledWith "/fixtures"
