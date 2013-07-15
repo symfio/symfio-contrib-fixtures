@@ -2,7 +2,10 @@
 
 > Load fixtures to database from fixtures directory.
 
-[![Build Status](https://travis-ci.org/symfio/symfio-contrib-fixtures.png?branch=master)](https://travis-ci.org/symfio/symfio-contrib-fixtures) [![Dependency Status](https://gemnasium.com/symfio/symfio-contrib-fixtures.png)](https://gemnasium.com/symfio/symfio-contrib-fixtures)
+[![Build Status](https://travis-ci.org/symfio/symfio-contrib-fixtures.png?branch=master)](https://travis-ci.org/symfio/symfio-contrib-fixtures)
+[![Coverage Status](https://coveralls.io/repos/symfio/symfio-contrib-fixtures/badge.png?branch=master)](https://coveralls.io/r/symfio/symfio-contrib-fixtures?branch=master)
+[![Dependency Status](https://gemnasium.com/symfio/symfio-contrib-fixtures.png)](https://gemnasium.com/symfio/symfio-contrib-fixtures)
+[![NPM version](https://badge.fury.io/js/symfio-contrib-fixtures.png)](http://badge.fury.io/js/symfio-contrib-fixtures)
 
 ## Usage
 
